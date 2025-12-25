@@ -1,0 +1,328 @@
+OLLAMA CLI INSTALLATION GUIDE FOR UBUNTU
+=========================================
+
+Step-by-step instructions to install and set up Ollama CLI on Ubuntu through terminal.
+
+PREREQUISITES
+-------------
+- Ubuntu 18.04 or later
+- Terminal access with sudo privileges
+- Internet connection
+
+INSTALLATION STEPS
+------------------
+
+Step 1: Update System Packages
+-------------------------------
+Update your package list to ensure you have the latest repository information:
+
+    sudo apt update
+    sudo apt upgrade -y
+
+
+Step 2: Install Ollama CLI
+---------------------------
+Use the official Ollama installation script:
+
+    curl -fsSL https://ollama.com/install.sh | sh
+
+This command will:
+- Download the Ollama installation script
+- Install Ollama binary to /usr/local/bin/ollama
+- Set up the Ollama service
+- Start the Ollama service automatically
+
+
+Step 3: Verify Installation
+----------------------------
+Check if Ollama was installed successfully:
+
+    ollama --version
+
+Expected output: ollama version is X.X.X
+
+
+Step 4: Check Ollama Service Status
+------------------------------------
+Verify that the Ollama service is running:
+
+    sudo systemctl status ollama
+
+To start the service if it's not running:
+
+    sudo systemctl start ollama
+
+To enable Ollama to start automatically on boot:
+
+    sudo systemctl enable ollama
+
+
+Step 5: Test Ollama CLI
+------------------------
+List installed models (should be empty initially):
+
+    ollama list
+
+
+Step 6: Pull a Model
+---------------------
+Download a model to test the installation. Popular options:
+
+For a small, fast model (3B parameters, ~2GB):
+    ollama pull llama3.2
+
+For a larger, more capable model (7B parameters, ~4GB):
+    ollama pull llama2
+
+For the latest Llama model (8B parameters):
+    ollama pull llama3.1
+
+Wait for the download to complete (this may take several minutes depending on your internet speed).
+
+
+Step 7: Verify Model Installation
+----------------------------------
+Check that the model was downloaded successfully:
+
+    ollama list
+
+You should see your downloaded model listed with its size and ID.
+
+
+Step 8: Run the Model
+---------------------
+Start an interactive chat session with the model:
+
+    ollama run llama3.2
+
+This will start a chat interface where you can:
+- Type questions or prompts
+- Press Ctrl+D or type /bye to exit
+- Use /help to see available commands
+
+
+ADVANCED USAGE
+--------------
+
+Running Ollama API Server
+-------------------------
+The Ollama service runs an API server on http://localhost:11434 by default.
+You can use this API in your applications.
+
+Check if the API is running:
+
+    curl http://localhost:11434/api/tags
+
+
+Using Ollama with Custom Port
+------------------------------
+To run Ollama on a different port:
+
+    OLLAMA_HOST=0.0.0.0:8080 ollama serve
+
+
+Running Ollama in Background
+-----------------------------
+The service is already running in the background. To check:
+
+    ps aux | grep ollama
+
+
+Stopping Ollama Service
+------------------------
+To stop the Ollama service:
+
+    sudo systemctl stop ollama
+
+
+Restarting Ollama Service
+--------------------------
+To restart the Ollama service:
+
+    sudo systemctl restart ollama
+
+
+ENVIRONMENT VARIABLES
+---------------------
+
+OLLAMA_HOST: Set custom host and port (default: 127.0.0.1:11434)
+    export OLLAMA_HOST=0.0.0.0:8080
+
+OLLAMA_MODELS: Set custom directory for models (default: ~/.ollama/models)
+    export OLLAMA_MODELS=/path/to/models
+
+
+COMMON COMMANDS
+---------------
+
+List all installed models:
+    ollama list
+
+Pull/download a model:
+    ollama pull <model-name>
+
+Run a model interactively:
+    ollama run <model-name>
+
+Remove a model:
+    ollama rm <model-name>
+
+Show model information:
+    ollama show <model-name>
+
+Copy a model:
+    ollama cp <source> <destination>
+
+Create a custom model from a Modelfile:
+    ollama create <model-name> -f ./Modelfile
+
+Get help:
+    ollama --help
+
+
+USING OLLAMA API WITH CURL
+---------------------------
+
+Generate a completion:
+    curl http://localhost:11434/api/generate -d '{
+      "model": "llama3.2",
+      "prompt": "Why is the sky blue?"
+    }'
+
+Chat with a model:
+    curl http://localhost:11434/api/chat -d '{
+      "model": "llama3.2",
+      "messages": [
+        {"role": "user", "content": "Hello! How are you?"}
+      ]
+    }'
+
+
+USING OLLAMA WITH PYTHON
+-------------------------
+
+First, install the Python library:
+    pip install ollama
+
+Example Python code:
+    import ollama
+    
+    response = ollama.chat(model='llama3.2', messages=[
+      {
+        'role': 'user',
+        'content': 'Why is the sky blue?',
+      },
+    ])
+    print(response['message']['content'])
+
+
+TROUBLESHOOTING
+---------------
+
+If 'ollama' command is not found:
+    # Check if binary exists
+    ls -la /usr/local/bin/ollama
+    
+    # Add to PATH if needed
+    export PATH=$PATH:/usr/local/bin
+    
+    # Add permanently to ~/.bashrc
+    echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
+    source ~/.bashrc
+
+If service fails to start:
+    # Check logs
+    sudo journalctl -u ollama -f
+    
+    # Check if port is already in use
+    sudo lsof -i :11434
+
+If download is slow or fails:
+    # Check internet connection
+    ping ollama.com
+    
+    # Try downloading again
+    ollama pull <model-name>
+
+Insufficient disk space:
+    # Check available space
+    df -h
+    
+    # Models are stored in ~/.ollama/models
+    # Free up space or change OLLAMA_MODELS location
+
+
+UNINSTALLATION
+--------------
+
+To completely remove Ollama:
+
+    # Stop the service
+    sudo systemctl stop ollama
+    sudo systemctl disable ollama
+    
+    # Remove the binary
+    sudo rm /usr/local/bin/ollama
+    
+    # Remove service file
+    sudo rm /etc/systemd/system/ollama.service
+    
+    # Reload systemd
+    sudo systemctl daemon-reload
+    
+    # Remove models and data (optional)
+    rm -rf ~/.ollama
+
+
+SYSTEM REQUIREMENTS
+-------------------
+
+Minimum:
+- 8GB RAM (for 3B models)
+- 10GB disk space
+- Modern CPU
+
+Recommended:
+- 16GB RAM (for 7B models)
+- 32GB disk space
+- GPU with 8GB+ VRAM (optional, for faster inference)
+
+
+GPU SUPPORT
+-----------
+
+Ollama automatically detects and uses GPU if available.
+
+For NVIDIA GPUs:
+- Ensure NVIDIA drivers are installed
+- Install CUDA toolkit
+- Ollama will automatically use GPU
+
+Check GPU usage:
+    nvidia-smi
+
+Monitor GPU while running Ollama:
+    watch -n 1 nvidia-smi
+
+
+ADDITIONAL RESOURCES
+--------------------
+
+Official website: https://ollama.com
+Documentation: https://github.com/ollama/ollama
+Model library: https://ollama.com/library
+Community: https://discord.gg/ollama
+
+
+NOTES
+-----
+
+- Models are downloaded to ~/.ollama/models by default
+- Each model can be several gigabytes in size
+- First run may take longer as the model loads into memory
+- Ollama runs as a system service and starts automatically on boot
+- API is accessible at http://localhost:11434 by default
+- Multiple models can be installed and run simultaneously
+
+
+END OF GUIDE
